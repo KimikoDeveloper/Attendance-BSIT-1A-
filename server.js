@@ -1,14 +1,4 @@
-/**
- * BSIT Attendance System — Backend Server
- * Pure Node.js (no npm install needed). Uses only built-in modules.
- *
- * Data is persisted to data/db.json on disk (acts as the backend database).
- * The frontend additionally caches the logged-in session in localStorage
- * so a page refresh keeps the user logged in.
- *
- * Run with:  node server.js
- * Then open: http://localhost:3000
- */
+
 
 const http = require('http');
 const fs = require('fs');
@@ -22,7 +12,7 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 
 // Hard-coded admin credentials (school-project scope — change for real use).
 const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'admin321';
+const ADMIN_PASSWORD = 'psubsityear2026';
 
 // ---------- tiny JSON "database" helpers ----------
 
