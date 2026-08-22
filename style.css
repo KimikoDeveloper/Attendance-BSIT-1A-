@@ -1,0 +1,517 @@
+/* =========================================================
+   BSIT Attendance Ledger — "Modern Technology" theme
+   Concept: a HUD-style ops console for taking roll call.
+   Dark canvas with a faint circuit/grid backdrop, glassy
+   panels, glowing cyan/violet accents. Numbers (student IDs,
+   codes, timestamps) render in a mono face like a terminal
+   readout — the daily code is the centerpiece "live signal".
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+:root {
+  --bg: #070a12;
+  --bg-grid: rgba(56, 189, 248, 0.055);
+  --panel: rgba(19, 26, 43, 0.72);
+  --panel-solid: #131a2b;
+  --panel-border: rgba(94, 234, 255, 0.16);
+  --panel-border-strong: rgba(94, 234, 255, 0.38);
+  --text: #e8edf7;
+  --text-soft: #93a0c2;
+  --text-dim: #5b6788;
+
+  --cyan: #33e0ff;
+  --cyan-soft: rgba(51, 224, 255, 0.14);
+  --violet: #8b7bff;
+  --violet-soft: rgba(139, 123, 255, 0.16);
+
+  --present: #2be08a;
+  --present-bg: rgba(43, 224, 138, 0.12);
+  --present-line: rgba(43, 224, 138, 0.4);
+
+  --absent: #ff4d6d;
+  --absent-bg: rgba(255, 77, 109, 0.12);
+  --absent-line: rgba(255, 77, 109, 0.4);
+
+  --nosession: #6b7594;
+  --nosession-bg: rgba(107, 117, 148, 0.14);
+
+  --amber: #ffb020;
+  --amber-bg: rgba(255, 176, 32, 0.12);
+
+  --radius: 14px;
+  --shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 20px 50px -24px rgba(0,0,0,0.7);
+  --glow-cyan: 0 0 0 1px var(--panel-border-strong), 0 0 24px -4px rgba(51, 224, 255, 0.35);
+  font-size: 16px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  background-image:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(139, 123, 255, 0.16), transparent 60%),
+    radial-gradient(ellipse 900px 600px at 100% 0%, rgba(51, 224, 255, 0.12), transparent 55%);
+  background-size: 36px 36px, 36px 36px, auto, auto;
+  background-attachment: fixed;
+}
+
+h1, h2, h3 {
+  font-family: 'Orbitron', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin: 0;
+  color: var(--text);
+}
+
+.mono, .student-number, .code-digits, .date-tag, td.num {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+a { color: var(--cyan); }
+
+button { font-family: inherit; cursor: pointer; }
+
+::selection { background: var(--cyan-soft); color: var(--text); }
+
+/* ---------- layout shell ---------- */
+
+.shell {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px 64px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 24px 20px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brand .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  background: var(--cyan-soft);
+  border: 1px solid var(--panel-border);
+  padding: 4px 9px;
+  border-radius: 5px;
+}
+
+.brand h1 {
+  font-size: 20px;
+  background: linear-gradient(90deg, #f2f6ff 0%, var(--cyan) 120%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.topbar .who {
+  font-size: 13px;
+  color: var(--text-soft);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--present);
+}
+.status-dot::before {
+  content: "";
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--present);
+  box-shadow: 0 0 8px 1px var(--present);
+  animation: pulse-dot 1.8s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.logout-btn {
+  border: 1px solid var(--panel-border);
+  background: rgba(255,255,255,0.02);
+  color: var(--text-soft);
+  padding: 7px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.logout-btn:hover { border-color: var(--absent-line); color: var(--absent); }
+
+/* ---------- card (glass panel) ---------- */
+
+.card {
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 26px;
+  margin-bottom: 22px;
+  position: relative;
+}
+
+.card h2 {
+  font-size: 15px;
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+
+.card .hint {
+  font-size: 13px;
+  color: var(--text-soft);
+  margin: 6px 0 18px;
+  line-height: 1.55;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 720px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ---------- form controls ---------- */
+
+label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 7px;
+}
+
+input[type="text"], input[type="password"], input[type="tel"], select {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1.5px solid var(--panel-border);
+  border-radius: 8px;
+  font-size: 15px;
+  background: rgba(6, 10, 20, 0.6);
+  color: var(--text);
+  margin-bottom: 16px;
+  font-family: inherit;
+}
+
+input::placeholder { color: var(--text-dim); }
+
+input.mono-input {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em;
+}
+
+input:focus, select:focus, button:focus-visible {
+  outline: none;
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px var(--cyan-soft);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  color: #06101f;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+.btn:hover { filter: brightness(1.12); }
+.btn:active { transform: translateY(1px); }
+.btn.block { width: 100%; }
+.btn.ghost {
+  background: rgba(255,255,255,0.03);
+  color: var(--cyan);
+  border: 1.5px solid var(--panel-border-strong);
+}
+.btn.ghost:hover { background: var(--cyan-soft); }
+.btn.danger { background: linear-gradient(90deg, var(--absent), #ff7a8a); color: #1a0508; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+
+/* ---------- tabs (login page) ---------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(6, 10, 20, 0.55);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 22px;
+}
+.tab-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px 0;
+  border-radius: 7px;
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: 0.02em;
+  color: var(--text-soft);
+}
+.tab-btn.active {
+  background: var(--cyan-soft);
+  color: var(--cyan);
+  box-shadow: 0 0 0 1px var(--panel-border-strong) inset;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.error-msg {
+  background: var(--absent-bg);
+  color: #ff8798;
+  border: 1px solid var(--absent-line);
+  padding: 10px 12px;
+  border-radius: 7px;
+  font-size: 13.5px;
+  margin-bottom: 16px;
+  display: none;
+}
+.error-msg.show { display: block; }
+
+.success-msg {
+  background: var(--present-bg);
+  color: #67f0ae;
+  border: 1px solid var(--present-line);
+  padding: 10px 12px;
+  border-radius: 7px;
+  font-size: 13.5px;
+  margin-bottom: 16px;
+  display: none;
+}
+.success-msg.show { display: block; }
+
+/* ---------- status chips ---------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid currentColor;
+}
+.chip.present { color: var(--present); background: var(--present-bg); text-shadow: 0 0 12px rgba(43,224,138,0.5); }
+.chip.absent { color: var(--absent); background: var(--absent-bg); text-shadow: 0 0 12px rgba(255,77,109,0.45); }
+.chip.no-session { color: var(--nosession); background: var(--nosession-bg); }
+
+/* ---------- code badge (HUD terminal readout) ---------- */
+
+.code-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(160deg, #0c1424 0%, #0a1a2e 100%);
+  border: 1px solid var(--panel-border-strong);
+  color: #fff;
+  border-radius: 12px;
+  padding: 22px 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--glow-cyan);
+}
+.code-badge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(51, 224, 255, 0.05) 0px,
+    rgba(51, 224, 255, 0.05) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events: none;
+}
+
+.code-badge .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 8px;
+}
+.code-digits {
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #eafdff;
+  text-shadow: 0 0 22px rgba(51, 224, 255, 0.6);
+}
+.code-digits.empty {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--text-dim);
+  font-family: 'Inter', sans-serif;
+  text-shadow: none;
+}
+
+/* ---------- table (the roll-call terminal) ---------- */
+
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+thead th {
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--panel-border-strong);
+  padding: 9px 10px;
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(148, 163, 200, 0.09);
+  vertical-align: middle;
+  color: var(--text);
+}
+
+tbody tr:hover { background: rgba(51, 224, 255, 0.045); }
+
+td.num { color: var(--text-dim); }
+
+.remove-btn {
+  border: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--absent);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+}
+.remove-btn:hover { background: var(--absent-bg); border-color: var(--absent-line); }
+
+.empty-row td {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 28px 10px;
+  font-style: italic;
+}
+
+/* ---------- date row / history controls ---------- */
+
+.date-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.date-row select { margin-bottom: 0; width: auto; min-width: 200px; }
+
+.summary-strip {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.summary-pill {
+  flex: 1;
+  min-width: 120px;
+  background: rgba(6, 10, 20, 0.5);
+  border: 1px solid var(--panel-border);
+  border-radius: 9px;
+  padding: 13px 15px;
+}
+.summary-pill .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 700;
+}
+.summary-pill .l {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+.summary-pill.present { border-color: var(--present-line); }
+.summary-pill.present .n { color: var(--present); }
+.summary-pill.absent { border-color: var(--absent-line); }
+.summary-pill.absent .n { color: var(--absent); }
+
+/* ---------- footer note ---------- */
+
+.foot-note {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 600px) {
+  .topbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .card { padding: 20px 16px; }
+  .code-digits { font-size: 30px; }
+  thead th:nth-child(1), tbody td:nth-child(1) { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-dot::before { animation: none; }
+}

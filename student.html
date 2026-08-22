@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Student — BSIT Attendance Ledger</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="eyebrow">BSIT // SYS</span>
+    <h1>Attendance Ledger</h1>
+  </div>
+  <div class="who">
+    <span class="status-dot">Online</span>
+    <span id="whoName">—</span>
+    <button class="logout-btn" id="logoutBtn">Log out</button>
+  </div>
+</div>
+
+<div class="shell">
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Mark today's attendance</h2>
+      <p class="hint">Enter the 4-digit code your instructor/admin shared for <span class="mono" id="todayLabel"></span>.</p>
+
+      <div class="error-msg" id="markError"></div>
+      <div class="success-msg" id="markSuccess"></div>
+
+      <form id="markForm">
+        <label for="codeInput">4-digit code</label>
+        <input type="tel" id="codeInput" class="mono-input" maxlength="4" inputmode="numeric" placeholder="0000" required />
+        <button type="submit" class="btn block" id="markBtn">Mark me present</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Today's status</h2>
+      <p class="hint">Your current status for <span class="mono" id="todayLabel2"></span>.</p>
+      <div id="todayStatusBox">
+        <span class="chip no-session">Loading…</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>My attendance history</h2>
+    <p class="hint">Every day a code was released, with your status.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Time marked</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr class="empty-row"><td colspan="4">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/student.js"></script>
+</body>
+</html>

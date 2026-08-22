@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — BSIT Attendance Ledger</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="eyebrow">BSIT // SYS</span>
+    <h1>Attendance Ledger</h1>
+  </div>
+  <div class="who">
+    <span class="status-dot">Online</span>
+    <span>Admin console</span>
+    <button class="logout-btn" id="logoutBtn">Log out</button>
+  </div>
+</div>
+
+<div class="shell">
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Today's code</h2>
+      <p class="hint">Generate a new 4-digit code each day. Students must enter it to be marked present for <span class="mono" id="todayLabel"></span>.</p>
+
+      <div class="code-badge">
+        <div>
+          <div class="label">Today's attendance code</div>
+          <div class="code-digits empty" id="codeDisplay">Not generated yet</div>
+        </div>
+        <button class="btn ghost" id="genCodeBtn">Generate new code</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Add student to roster</h2>
+      <p class="hint">Full name and 10-digit student number, exactly as the student will log in with.</p>
+      <div class="error-msg" id="addError"></div>
+      <div class="success-msg" id="addSuccess"></div>
+      <form id="addForm">
+        <label for="newName">Full name</label>
+        <input type="text" id="newName" placeholder="e.g. Juan Dela Cruz" required />
+        <label for="newNumber">Student number (10 digits)</label>
+        <input type="tel" id="newNumber" class="mono-input" maxlength="10" inputmode="numeric" placeholder="e.g. 2023100234" required />
+        <button type="submit" class="btn block">Add student</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Attendance by date</h2>
+    <p class="hint">Pick a date to see who was present and who was absent.</p>
+
+    <div class="date-row">
+      <select id="dateSelect"></select>
+      <button class="btn ghost" id="todayBtn">Jump to today</button>
+    </div>
+
+    <div class="summary-strip" id="summaryStrip"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Student No.</th>
+            <th>Status</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody id="attendanceBody">
+          <tr class="empty-row"><td colspan="5">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Full student roster</h2>
+    <p class="hint">Everyone currently registered. Removing a student stops them from logging in, but keeps their past attendance history.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Student No.</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="rosterBody">
+          <tr class="empty-row"><td colspan="4">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

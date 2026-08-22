@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BSIT Attendance Ledger</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="eyebrow">BSIT // SYS</span>
+    <h1>Attendance Ledger</h1>
+  </div>
+  <span class="status-dot">System online</span>
+</div>
+
+<div class="shell" style="max-width:460px; padding-top:20px;">
+  <div class="card">
+    <h2>Sign in</h2>
+    <p class="hint">Students log in with their full name and 10-digit student number. Admins use their staff credentials.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="student">Student</button>
+      <button class="tab-btn" data-tab="admin">Admin</button>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- Student login -->
+    <div class="tab-panel active" id="panel-student">
+      <form id="studentForm">
+        <label for="sName">Full name</label>
+        <input type="text" id="sName" placeholder="e.g. Juan Dela Cruz" autocomplete="name" required />
+
+        <label for="sNumber">Student number (10 digits)</label>
+        <input type="tel" id="sNumber" class="mono-input" placeholder="e.g. 2023100234" maxlength="10" inputmode="numeric" required />
+
+        <button type="submit" class="btn block">Log in as student</button>
+      </form>
+    </div>
+
+    <!-- Admin login -->
+    <div class="tab-panel" id="panel-admin">
+      <form id="adminForm">
+        <label for="aUser">Username</label>
+        <input type="text" id="aUser" autocomplete="username" required />
+
+        <label for="aPass">Password</label>
+        <input type="password" id="aPass" autocomplete="current-password" required />
+
+        <button type="submit" class="btn block">Log in as admin</button>
+      </form>
+    </div>
+  </div>
+  <p class="foot-note">Not on the roster yet? Ask your admin to add your name and student number.</p>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>
